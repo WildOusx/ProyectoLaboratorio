@@ -1,9 +1,6 @@
 ; vim: set tabstop=8 shiftwidth=8 noexpandtab:
-	xdef	_c2p1x1_8_falcon	;export symbol
-	xdef	_c2p1x1_8_tt		;export symbol
-	xdef	_c2p1x1_8_tt_partial		;export symbol
-	xdef	_c2p1x1_4_st		;export symbol
-	;code
+		; Assembly stub: original file moved to deprecated_tools/src/video/c2p1x1_8.s
+	.error "Source moved to deprecated_tools/src/video/c2p1x1_8.s - restore if needed"
 
 
 ; prototypes :

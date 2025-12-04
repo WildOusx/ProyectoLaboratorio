@@ -1,5 +1,17 @@
-	; Assembly stub: original file moved to deprecated_tools/src/input/atari_ikbd.s
-.error "Source moved to deprecated_tools/src/input/atari_ikbd.s - restore if needed"
+	; MC6850 ACIA interrupt handler code
+	; MC6850 registers :
+	; $FFFFFC00  Keyboard ACIA control (w) / status (r)
+	; $FFFFFC02  Keyboard ACIA data (r/w)
+	; $FFFFFC04  MIDI ACIA control (w) / status (r)
+	; $FFFFFC06  MIDI ACIA data (r/w)
+	; http://dev-docs.atariforge.org/files/MC6850.pdf
+	;
+	; https://www.kernel.org/doc/Documentation/input/atarikbd.txt
+
+	xdef	_install_ikbd_handler	;export symbol
+	xdef	_uninstall_ikbd_handler	;export symbol
+
+	code
 
 _install_ikbd_handler:
 	movem.l	d0-d1/a0-a1,-(sp)
@@ -76,7 +88,7 @@ old_ikbd:	ds.l	1
 
 ikbd:
 	btst	#0,$fffffc00.w	; test bit 0 of MC6850 Status register
-							; RDRF = Receive Data Register Full
+						; RDRF = Receive Data Register Full
 	beq.s	ikbd_callold	; nothing to receive might be MIDI ?
 	move.l	d0,-(sp)	; save register
 
@@ -89,9 +101,9 @@ ikbd:
 	; $fe : joystick 0 (TODO ?)
 	; $ff : joystick 1 (OK)
 	move.b	$fffffc02.w,d0		; read MC6850 Receive data register
-	cmp.b	#$ff,d0				; joystick 1 ?
+	cmp.b	#$ff,d0			; joystick 1 ?
 	beq.s	.joystick1_packet
-	cmp.b	#$f8,d0				; mouse ?
+	cmp.b	#$f8,d0			; mouse ?
 	bmi.s	.nomouse
 	cmp.b	#$fc,d0
 	bpl.s	.nomouse
@@ -124,17 +136,17 @@ ikbd_return_stack:
 	move.l	(sp)+,d0
 ikbd_return:
 	bclr	#6,$fffffa11.w		; acknowledge IKBD interrupt
-	rte					; return from interrupt
+	rte						; return from interrupt
 
 
-ikbd_callold:				; call old routine, so MIDI or other can be
+ikbd_callold:			; call old routine, so MIDI or other can be
 	move.l	old_ikbd,-(sp)	; processed
 	rts
 
 	; 2nd byte mouse packet handler
 ikbd_mousex:
 	btst	#0,$fffffc00.w	; test bit 0 of MC6850 Status register
-							; RDRF = Receive Data Register Full
+						; RDRF = Receive Data Register Full
 	beq.s	ikbd_callold	; nothing to receive might be MIDI ?
 	move.b	$fffffc02.w,ikbd_mouse_pktx
 	move.l	#ikbd_mousey,$118.w		; handler for mouse 3rd byte
@@ -143,7 +155,7 @@ ikbd_mousex:
 	; 3nd byte mouse packet handler
 ikbd_mousey:
 	btst	#0,$fffffc00.w	; test bit 0 of MC6850 Status register
-							; RDRF = Receive Data Register Full
+						; RDRF = Receive Data Register Full
 	beq.s	ikbd_callold	; nothing to receive might be MIDI ?
 	move.b	$fffffc02.w,ikbd_mouse_pkty
 	move.l	#ikbd,$118.w		; back to regular handler
@@ -157,7 +169,7 @@ ikbd_mousey:
 	; joystick 2nd byte handler
 ikbd_poll_joystick1:
 	btst	#0,$fffffc00.w	; test bit 0 of MC6850 Status register
-							; RDRF = Receive Data Register Full
+						; RDRF = Receive Data Register Full
 	beq.s	ikbd_callold	; nothing to receive might be MIDI ?
 
 	tst.b	$fffffc02.w	; consume joystick byte, do nothing with it

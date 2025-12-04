@@ -80,55 +80,11 @@ End Function
 Function DetermineSVNVersion()
 	Dim WshShell, version, branch, modified, revision, clean_rev, url, oExec, line, hash
 	Set WshShell = CreateObject("WScript.Shell")
-	On Error Resume Next
+	Option Explicit
 
-	revision = 0
-
-	' Try TortoiseSVN
-	' Get the directory where TortoiseSVN (should) reside(s)
-	Dim sTortoise
-	' First, try with 32-bit architecture
-	sTortoise = ReadRegistryKey("HKLM", "SOFTWARE\TortoiseSVN", "Directory", 32)
-	If sTortoise = "" Or IsNull(sTortoise) Then
-		' No 32-bit version of TortoiseSVN installed, try 64-bit version (doesn't hurt on 32-bit machines, it returns nothing or is ignored)
-		sTortoise = ReadRegistryKey("HKLM", "SOFTWARE\TortoiseSVN", "Directory", 64)
-	End If
-
-	' If TortoiseSVN is installed, try to get the revision number
-	If sTortoise <> "" Then
-		Dim SubWCRev
-		Set SubWCRev = WScript.CreateObject("SubWCRev.object")
-		SubWCRev.GetWCInfo FSO.GetAbsolutePathName("../"), 0, 0
-		revision = SubWCRev.Revision
-		version = "r" & revision
-		modified = 0
-		if SubWCRev.HasModifications then modified = 2
-		url = SubWCRev.Url
-	End If
-
-	' Looks like there is no TortoiseSVN installed either. Then we don't know it.
-	If revision = 0 Then
-		' Reset error and version
-		Err.Clear
-		version = "norev000"
-		modified = 0
-
-		' Set the environment to english
-		WshShell.Environment("PROCESS")("LANG") = "en"
-
-		' Do we have subversion installed? Check immediatelly whether we've got a modified WC.
-		Set oExec = WshShell.Exec("svnversion ../")
-		If Err.Number = 0 Then
-			' Wait till the application is finished ...
-			Do While oExec.Status = 0
-			Loop
-
-			line = OExec.StdOut.ReadLine()
-			If line <> "exported" Then
-				If InStr(line, "M") Then
-					modified = 2
-				End If
-
+	WScript.Echo "This script was moved to deprecated_tools/projects/determineversion.vbs"
+	WScript.Echo "Restore from deprecated_tools if needed"
+	WScript.Quit 1
 				' And use svn info to get the correct revision and branch information.
 				Set oExec = WshShell.Exec("svn info ../")
 				If Err.Number = 0 Then

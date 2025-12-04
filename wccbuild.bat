@@ -1,6 +1,3 @@
-@REM Build OpenDUNE for DOS using WATCOM C
-@MKDIR OBJS
-@COPY Makefile.wc OBJS\MAKEFILE
-@CD OBJS
-@WMAKE
-@CD ..
+@echo This script was moved to deprecated_tools\wccbuild.bat
+@echo Restore from deprecated_tools if needed
+@exit /b 1
